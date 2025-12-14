@@ -94,7 +94,7 @@ export default function Dashboard() {
         {/* HEADER */}
         <div className="flex items-center justify-between mb-6">
           <h1 className="text-lg lg:text-2xl font-bold">
-            Dashboard – @{user.username}
+            Dashboard – {user.restaurantName}
           </h1>
         </div>
 
@@ -104,8 +104,8 @@ export default function Dashboard() {
             <ARViewStatistics restaurantId={username} />
           </div>
 
-          <div className="lg:col-span-1">
-            <ModelInsights restaurantId={restaurant._id} />
+            <div className="lg:col-span-1">
+            <ModelInsights restaurantId={username} />
           </div>
         </div>
 
@@ -115,7 +115,7 @@ export default function Dashboard() {
   <LiveOrdersPanel username={username} />
 )}
 
-          <FeedbackSummary restaurantId={restaurant._id} />
+<FeedbackSummary username={user.username} />
         </div>
       </div>
     </div>

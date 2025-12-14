@@ -1,67 +1,121 @@
-import React, { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { api } from "../../services/api";
+import { TrendingUp } from "lucide-react";
 
 export default function ModelInsights({ restaurantId }) {
-  const [topModels, setTopModels] = useState([]);
+  const [items, setItems] = useState([]);
   const [loading, setLoading] = useState(true);
 
+  /* ---------------- FETCH DATA ---------------- */
   useEffect(() => {
-    const fetchTopModels = async () => {
-      try {
-        if (!restaurantId) return; // ensure restaurantId is provided
+    if (!restaurantId) return;
 
-        const { data } = await api.get("/ar-stats/top", {
-          params: { limit: 10, restaurantId }
-        });
-
-        setTopModels(data.topItems);
-      } catch (error) {
-        console.error("Failed to load insights:", error);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchTopModels();
+    api
+      .get("/ar-stats/top", {
+        params: { restaurantId, limit: 10 },
+      })
+      .then((res) => setItems(res.data.topItems || []))
+      .catch(() => {})
+      .finally(() => setLoading(false));
   }, [restaurantId]);
 
+  /* ---------------- LOADING ---------------- */
+  if (loading) {
+    return (
+      <div className="bg-[#0D1017] border border-[#1F2532] rounded-2xl p-6 animate-pulse">
+        <div className="h-4 w-40 bg-[#1A2030] rounded mb-2" />
+        <div className="h-3 w-52 bg-[#1A2030] rounded mb-6" />
+
+        {[...Array(5)].map((_, i) => (
+          <div key={i} className="flex items-center gap-4 mb-4">
+            <div className="w-11 h-11 bg-[#1A2030] rounded-xl" />
+            <div className="flex-1 space-y-2">
+              <div className="h-3 w-32 bg-[#1A2030] rounded" />
+              <div className="h-2 w-24 bg-[#1A2030] rounded" />
+            </div>
+          </div>
+        ))}
+      </div>
+    );
+  }
+
   return (
-    <div className="relative group bg-[#0D1017] border border-[#1F2532] rounded-2xl p-6 shadow-md">
-      <h2 className="text-base font-medium mb-1">3D Model Insights</h2>
-      <p className="text-xs text-gray-400 mb-4">Top-performing AR dishes</p>
+    <div
+      className="relative bg-[#0D1017] border border-[#1F2532] rounded-2xl p-6
+      shadow-[0_0_25px_-10px_rgba(0,0,0,0.6)]
+      transition-all duration-500"
+    >
+      {/* Glass highlight */}
+      <div className="absolute inset-0 rounded-2xl bg-gradient-to-b from-white/5 to-transparent pointer-events-none" />
 
-      {loading ? (
-        <p className="text-xs text-gray-500">Loading...</p>
-      ) : topModels.length === 0 ? (
-        <p className="text-xs text-gray-500">No performance data found.</p>
+      {/* ---------------- HEADER (same height style as AR stats) ---------------- */}
+      <div className="relative flex items-center justify-between mb-5">
+        <div>
+          <h2 className="text-sm font-semibold text-gray-200">
+            AR Model Insights
+          </h2>
+          <p className="text-[11px] text-gray-500 mt-1">
+            Top performing AR dishes
+          </p>
+        </div>
+
+        <div className="w-8 h-8 rounded-lg bg-indigo-500/10 flex items-center justify-center">
+          <TrendingUp className="w-4 h-4 text-indigo-400" />
+        </div>
+      </div>
+
+      {/* ---------------- CONTENT (HEIGHT MATCHED) ---------------- */}
+      {items.length === 0 ? (
+        <p className="text-xs text-gray-500">No AR data yet</p>
       ) : (
-        <div className="space-y-3 max-h-[380px] overflow-y-scroll pr-1 hide-scrollbar">
-          {topModels.map((model, index) => (
+        <div
+          className="
+            space-y-3
+            h-[260px]              /* ✅ MATCHES ARViewStatistics chart height */
+            overflow-y-auto
+            pr-1
+            hide-scrollbar
+          "
+        >
+          {items.map((item, i) => (
             <div
-              key={model.itemName}
-              className="flex items-center gap-3 bg-[#11141D] p-2 rounded-lg border border-gray-800"
+              key={i}
+              className="group flex items-center gap-4
+              bg-[#11141D] border border-[#232A37]
+              rounded-xl p-3
+              transition-all duration-300
+              hover:border-indigo-400/50
+              hover:-translate-y-[1px]
+              hover:shadow-[0_0_18px_-6px_rgba(99,102,241,0.35)]"
             >
-              <img
-                src={model.imageUrl}
-                alt={model.itemName}
-                className="w-10 h-10 rounded-md object-cover"
-              />
+              {/* Image + badge */}
+              <div className="relative">
+                <img
+                  src={item.imageUrl}
+                  alt={item._id}
+                  className="w-11 h-11 rounded-xl object-cover"
+                />
 
-              <div className="flex-1">
-                <p className="text-xs font-medium text-gray-100">{model.itemName}</p>
-                <p className="text-[10px] text-gray-400">{model.totalClicks} AR Views</p>
+                {i === 0 && (
+                  <span
+                    className="absolute -top-1.5 -right-1.5
+                    text-[9px] px-1.5 py-0.5
+                    rounded-md bg-indigo-600 text-white"
+                  >
+                    Top
+                  </span>
+                )}
               </div>
 
-              {index === 0 && (
-                <span className="text-[10px] px-1.5 py-0.5 bg-pink-600 text-white rounded-sm">
-                  🔥 Trending
-                </span>
-              )}
-              {index === 1 && (
-                <span className="text-[10px] px-1.5 py-0.5 bg-blue-600 text-white rounded-sm">
-                  Popular
-                </span>
-              )}
+              {/* Text */}
+              <div className="flex-1 min-w-0">
+                <p className="text-xs font-medium text-gray-100 truncate">
+                  {item._id}
+                </p>
+                <p className="text-[10px] text-gray-400 mt-0.5">
+                  {item.totalClicks} AR views
+                </p>
+              </div>
             </div>
           ))}
         </div>
