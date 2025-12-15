@@ -16,86 +16,143 @@ export default function ARViewStatistics({ restaurantId }) {
   const [weeklyStats, setWeeklyStats] = useState([]);
   const [totalWeekClicks, setTotalWeekClicks] = useState(0);
 
-  // Get last 7 days in YYYY-MM-DD
+  /* ---------------- LAST 7 DAYS ---------------- */
   const getLast7Days = () => {
     const dates = [];
     for (let i = 6; i >= 0; i--) {
       const d = new Date();
       d.setDate(d.getDate() - i);
-      dates.push(d.toLocaleDateString("en-CA", { timeZone: "Asia/Kolkata" }));
+      dates.push(
+        d.toLocaleDateString("en-CA", { timeZone: "Asia/Kolkata" })
+      );
     }
     return dates;
   };
 
+  /* ---------------- FETCH ---------------- */
   const fetchWeeklyStats = async () => {
     if (!restaurantId) return;
-    try {
-      const res = await axios.get(`https://dishpop-user-side-backend.onrender.com/api/ar/stats/${restaurantId}`);
-      const data = res.data.stats || [];
 
+    try {
+      const res = await axios.get(
+        `https://dishpop-user-side-backend.onrender.com/api/ar/stats/${restaurantId}`
+      );
+
+      const data = res.data.stats || [];
       const last7Days = getLast7Days();
 
       const chartData = last7Days.map((date) => {
         const totalClicks = data
           .filter((s) => s.date === date)
           .reduce((sum, s) => sum + s.clicks, 0);
-        return { date, clicks: totalClicks };
+
+        const dayLabel = new Date(date).toLocaleDateString("en-US", {
+          weekday: "short",
+          timeZone: "Asia/Kolkata",
+        });
+
+        return {
+          date,        // ✅ internal (for live updates)
+          day: dayLabel, // ✅ display (for X-axis)
+          clicks: totalClicks,
+        };
       });
 
       setWeeklyStats(chartData);
-      setTotalWeekClicks(chartData.reduce((sum, d) => sum + d.clicks, 0));
+      setTotalWeekClicks(
+        chartData.reduce((sum, d) => sum + d.clicks, 0)
+      );
     } catch (err) {
       console.error("Failed to fetch weekly AR stats:", err);
     }
   };
 
   useEffect(() => {
-    const Fetch = ()=>{
-      fetchWeeklyStats();
-    }
-    Fetch()
+    fetchWeeklyStats();
   }, [restaurantId]);
 
-  // Live updates for today
+  /* ---------------- LIVE UPDATES ---------------- */
   useEffect(() => {
     socket.on("ar-updated", (data) => {
-      if (data.restaurantId === restaurantId) {
-        const today = new Date().toLocaleDateString("en-CA", { timeZone: "Asia/Kolkata" });
-        setWeeklyStats((prev) => {
-          const newStats = [...prev];
-          const index = newStats.findIndex((d) => d.date === today);
-          if (index >= 0) {
-            newStats[index] = { ...newStats[index], clicks: newStats[index].clicks + 1 };
-          }
-          return newStats;
-        });
+      if (data.restaurantId !== restaurantId) return;
 
-        setTotalWeekClicks((prev) => prev + 1);
-      }
+      const today = new Date().toLocaleDateString("en-CA", {
+        timeZone: "Asia/Kolkata",
+      });
+
+      setWeeklyStats((prev) =>
+        prev.map((d) =>
+          d.date === today ? { ...d, clicks: d.clicks + 1 } : d
+        )
+      );
+
+      setTotalWeekClicks((prev) => prev + 1);
     });
 
     return () => socket.off("ar-updated");
   }, [restaurantId]);
 
   return (
-    <div className="relative h-full group bg-[#0D1017] border border-[#1F2532] rounded-2xl p-6 shadow-[0_0_25px_-10px_rgba(0,0,0,0.6)] transition-all duration-500 hover:shadow-[0_0_37px_-10px_rgba(30,58,138,0.6)]">
-      <div className="absolute inset-0 rounded-2xl bg-gradient-to-b from-white/5 to-transparent pointer-events-none"></div>
+    <div className="relative bg-[#0D1017] border border-[#1F2532] rounded-2xl p-6 h-full">
+      {/* HEADER */}
+      <div className="flex items-center justify-between mb-4">
+        <div>
+          <h2 className="text-sm font-semibold text-gray-200">
+            AR Views
+          </h2>
+          <p className="text-[11px] text-gray-500 mt-1">
+            Last 7 days performance
+          </p>
+        </div>
 
-      {/* Header */}
-      <div className="flex justify-between items-center mb-4">
-        <h2 className="text-lg font-semibold">AR Views - Last 7 Days</h2>
-        <p className="text-blue-400 font-bold">{totalWeekClicks} views this week</p>
+        <p className="text-sm font-bold text-blue-400">
+          {totalWeekClicks} views
+        </p>
       </div>
 
-      {/* Chart */}
-      <div className="w-full h-64">
+      {/* CHART */}
+      <div className="w-full h-[260px]">
         <ResponsiveContainer width="100%" height="100%">
-          <BarChart data={weeklyStats} margin={{ top: 20, right: 20, left: 0, bottom: 5 }}>
-            <CartesianGrid stroke="#2c2c2c" strokeDasharray="3 3" />
-            <XAxis dataKey="date" stroke="#8884d8" />
-            <YAxis stroke="#8884d8" />
-            <Tooltip />
-            <Bar dataKey="clicks" fill="#82ca9d" />
+          <BarChart
+            data={weeklyStats}
+            margin={{ top: 10, right: 20, left: -10, bottom: 0 }}
+          >
+            {/* Horizontal grid only */}
+            <CartesianGrid
+              vertical={false}
+              stroke="#1F2532"
+              strokeDasharray="3 3"
+            />
+
+            <XAxis
+              dataKey="day"   // ✅ FIXED
+              tick={{ fill: "#9CA3AF", fontSize: 10 }}
+              axisLine={{ stroke: "#232A37" }}
+              tickLine={false}
+            />
+
+            <YAxis
+              tick={{ fill: "#9CA3AF", fontSize: 10 }}
+              axisLine={{ stroke: "#232A37" }}
+              tickLine={false}
+            />
+
+            <Tooltip
+              contentStyle={{
+                backgroundColor: "#0D1017",
+                border: "1px solid #1F2532",
+                borderRadius: "8px",
+                fontSize: "11px",
+              }}
+              labelStyle={{ color: "#9CA3AF" }}
+              itemStyle={{ color: "#60A5FA" }}
+            />
+
+            <Bar
+              dataKey="clicks"
+              fill="#60A5FA"
+              radius={[6, 6, 0, 0]}
+            />
           </BarChart>
         </ResponsiveContainer>
       </div>

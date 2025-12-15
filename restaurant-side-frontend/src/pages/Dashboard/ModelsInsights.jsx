@@ -23,15 +23,15 @@ export default function ModelInsights({ restaurantId }) {
   if (loading) {
     return (
       <div className="bg-[#0D1017] border border-[#1F2532] rounded-2xl p-6 animate-pulse">
-        <div className="h-4 w-40 bg-[#1A2030] rounded mb-2" />
-        <div className="h-3 w-52 bg-[#1A2030] rounded mb-6" />
+        <div className="h-4 w-40 bg-[#1A1F2B] rounded mb-2" />
+        <div className="h-3 w-52 bg-[#1A1F2B] rounded mb-6" />
 
         {[...Array(5)].map((_, i) => (
           <div key={i} className="flex items-center gap-4 mb-4">
-            <div className="w-11 h-11 bg-[#1A2030] rounded-xl" />
+            <div className="w-11 h-11 bg-[#1A1F2B] rounded-xl" />
             <div className="flex-1 space-y-2">
-              <div className="h-3 w-32 bg-[#1A2030] rounded" />
-              <div className="h-2 w-24 bg-[#1A2030] rounded" />
+              <div className="h-3 w-32 bg-[#1A1F2B] rounded" />
+              <div className="h-2 w-24 bg-[#1A1F2B] rounded" />
             </div>
           </div>
         ))}
@@ -40,16 +40,9 @@ export default function ModelInsights({ restaurantId }) {
   }
 
   return (
-    <div
-      className="relative bg-[#0D1017] border border-[#1F2532] rounded-2xl p-6
-      shadow-[0_0_25px_-10px_rgba(0,0,0,0.6)]
-      transition-all duration-500"
-    >
-      {/* Glass highlight */}
-      <div className="absolute inset-0 rounded-2xl bg-gradient-to-b from-white/5 to-transparent pointer-events-none" />
-
-      {/* ---------------- HEADER (same height style as AR stats) ---------------- */}
-      <div className="relative flex items-center justify-between mb-5">
+    <div className="relative bg-[#0D1017] border border-[#1F2532] rounded-2xl p-6">
+      {/* ---------------- HEADER ---------------- */}
+      <div className="flex items-center justify-between mb-5">
         <div>
           <h2 className="text-sm font-semibold text-gray-200">
             AR Model Insights
@@ -59,19 +52,19 @@ export default function ModelInsights({ restaurantId }) {
           </p>
         </div>
 
-        <div className="w-8 h-8 rounded-lg bg-indigo-500/10 flex items-center justify-center">
-          <TrendingUp className="w-4 h-4 text-indigo-400" />
+        <div className="w-8 h-8 bg-blue-500/10 flex items-center justify-center rounded-lg">
+          <TrendingUp className="w-4 h-4 text-blue-400" />
         </div>
       </div>
 
-      {/* ---------------- CONTENT (HEIGHT MATCHED) ---------------- */}
+      {/* ---------------- CONTENT ---------------- */}
       {items.length === 0 ? (
-        <p className="text-xs text-gray-500">No AR data yet</p>
+        <p className="text-xs text-gray-500">No AR data yet.</p>
       ) : (
         <div
           className="
             space-y-3
-            h-[260px]              /* ✅ MATCHES ARViewStatistics chart height */
+            h-[260px]
             overflow-y-auto
             pr-1
             hide-scrollbar
@@ -80,15 +73,17 @@ export default function ModelInsights({ restaurantId }) {
           {items.map((item, i) => (
             <div
               key={i}
-              className="group flex items-center gap-4
-              bg-[#11141D] border border-[#232A37]
-              rounded-xl p-3
-              transition-all duration-300
-              hover:border-indigo-400/50
-              hover:-translate-y-[1px]
-              hover:shadow-[0_0_18px_-6px_rgba(99,102,241,0.35)]"
+              className="
+                group flex items-center gap-4
+                bg-[#12151D] border border-[#232A37]
+                rounded-xl p-3
+                transition-all duration-300
+                hover:border-blue-400/40
+                hover:-translate-y-[1px]
+                hover:shadow-[0_0_16px_-6px_rgba(59,130,246,0.35)]
+              "
             >
-              {/* Image + badge */}
+              {/* Image */}
               <div className="relative">
                 <img
                   src={item.imageUrl}
@@ -97,11 +92,7 @@ export default function ModelInsights({ restaurantId }) {
                 />
 
                 {i === 0 && (
-                  <span
-                    className="absolute -top-1.5 -right-1.5
-                    text-[9px] px-1.5 py-0.5
-                    rounded-md bg-indigo-600 text-white"
-                  >
+                  <span className="absolute -top-1.5 -right-1.5 text-[9px] px-1.5 py-0.5 rounded-md bg-blue-600 text-white">
                     Top
                   </span>
                 )}

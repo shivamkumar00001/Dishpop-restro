@@ -24,7 +24,7 @@ export default function LiveOrdersPanel({ username }) {
   });
 
   /* ===============================
-     SOUND INIT (AUTOPLAY SAFE)
+     SOUND INIT
   =============================== */
   useEffect(() => {
     audioRef.current = new Audio("/sounds/new-order.mp3");
@@ -38,8 +38,7 @@ export default function LiveOrdersPanel({ username }) {
   }, []);
 
   /* ===============================
-     INITIAL FETCH (FAILSAFE)
-     → Ensures accuracy after refresh
+     INITIAL FETCH
   =============================== */
   useEffect(() => {
     if (!username) return;
@@ -53,18 +52,15 @@ export default function LiveOrdersPanel({ username }) {
           .slice(0, 3);
 
         setOrders(latestPending);
-        localStorage.setItem(
-          STORAGE_KEY,
-          JSON.stringify(latestPending)
-        );
-      } catch (err) {
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(latestPending));
+      } catch {
         console.warn("LiveOrders fallback fetch failed");
       }
     })();
   }, [username]);
 
   /* ===============================
-     SOCKET EVENTS (REALTIME)
+     SOCKET EVENTS
   =============================== */
   const handleLiveOrder = useCallback((type, order) => {
     if (type === "created" && order.status === "pending") {
@@ -114,18 +110,11 @@ export default function LiveOrdersPanel({ username }) {
      UI
   =============================== */
   return (
-    <div
-      className="relative bg-[#0D1017] border border-[#1F2532]
-      rounded-2xl p-6 shadow-[0_0_25px_-10px_rgba(0,0,0,0.6)]
-      transition-all duration-500 hover:shadow-[0_0_37px_-10px_rgba(30,58,138,0.6)]"
-    >
-      {/* Glass shine */}
-      <div className="absolute inset-0 rounded-2xl bg-gradient-to-b from-white/5 to-transparent pointer-events-none" />
-
+    <div className="relative bg-[#0D1017] border border-[#1F2532] rounded-2xl p-6">
       {/* HEADER */}
       <div className="flex items-center justify-between mb-5">
         <div>
-          <h2 className="text-sm font-semibold tracking-wide text-gray-200">
+          <h2 className="text-sm font-semibold text-gray-200">
             Live Orders
           </h2>
           <p className="text-[11px] text-gray-500 mt-1">
@@ -141,8 +130,7 @@ export default function LiveOrdersPanel({ username }) {
           {orders.length >= 3 && (
             <button
               onClick={() => navigate(`/${username}/orders`)}
-              className="flex items-center gap-1 text-xs
-              text-blue-400 hover:text-blue-300 transition"
+              className="flex items-center gap-1 text-xs text-blue-400 hover:text-blue-300 transition"
             >
               View all
               <ChevronRight className="w-3 h-3" />
@@ -161,9 +149,7 @@ export default function LiveOrdersPanel({ username }) {
           {orders.map((order) => (
             <div
               key={order._id}
-              className="bg-[#12151D] border border-[#232A37]
-              rounded-xl p-4 transition-all duration-300
-              hover:border-blue-400/40"
+              className="bg-[#12151D] border border-[#232A37] rounded-xl p-4 transition hover:border-blue-400/40"
             >
               <div className="flex justify-between text-xs text-gray-400 mb-1">
                 <span className="font-medium text-gray-200">
@@ -192,22 +178,14 @@ export default function LiveOrdersPanel({ username }) {
               <div className="flex gap-2">
                 <button
                   onClick={() => handleAction(order._id, "accepted")}
-                  className="flex-1 cursor-pointer
-                  bg-green-500/15 text-green-400
-                  hover:bg-green-500/25
-                  border border-green-500/30
-                  text-xs py-1.5 rounded-lg transition"
+                  className="flex-1 bg-green-500/15 text-green-400 border border-green-500/30 hover:bg-green-500/25 text-xs py-1.5 rounded-lg transition"
                 >
                   Accept
                 </button>
 
                 <button
                   onClick={() => handleAction(order._id, "rejected")}
-                  className="flex-1 cursor-pointer
-                  bg-red-500/15 text-red-400
-                  hover:bg-red-500/25
-                  border border-red-500/30
-                  text-xs py-1.5 rounded-lg transition"
+                  className="flex-1 bg-red-500/15 text-red-400 border border-red-500/30 hover:bg-red-500/25 text-xs py-1.5 rounded-lg transition"
                 >
                   Reject
                 </button>

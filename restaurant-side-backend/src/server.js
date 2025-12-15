@@ -3,12 +3,15 @@ require("dotenv").config();
 // ======================
 // DEBUG ENVIRONMENT VARIABLES
 // ======================
-console.log("=== ENV DEBUG START ===");
-console.log("MONGO_URL:", process.env.MONGO_URL);
-console.log("R2_BUCKET:", process.env.R2_BUCKET);
-console.log("R2_ACCOUNT_ID:", process.env.R2_ACCOUNT_ID);
-console.log("R2_PUBLIC_URL:", process.env.R2_PUBLIC_URL);
-console.log("=== ENV DEBUG END ===");
+// console.log("=== ENV DEBUG START ===");
+// console.log("MONGO_URL:", process.env.MONGO_URL);
+// console.log("R2_BUCKET:", process.env.R2_BUCKET);
+// console.log("R2_ACCOUNT_ID:", process.env.R2_ACCOUNT_ID);
+// console.log("R2_PUBLIC_URL:", process.env.R2_PUBLIC_URL);
+// console.log("=== ENV DEBUG END ===");
+if (process.env.NODE_ENV !== "production") {
+  console.log("ENV loaded");
+}
 
 // ======================
 // IMPORTS
@@ -47,7 +50,7 @@ const app = express();
 // ======================
 app.use(
   cors({
-    origin: ["http://localhost:5173", "http://localhost:5174"],
+    origin: process.env.CORS_ORIGIN || "*",
     credentials: true,
     methods: ["GET", "POST", "PUT", "DELETE", "PATCH"],
   })
@@ -63,10 +66,13 @@ app.use(cookieParser());
 // ======================
 // REQUEST LOGGER (SAFE FOR PROD)
 // ======================
-app.use((req, res, next) => {
-  console.log(`[${req.method}] ${req.originalUrl}`);
-  next();
-});
+if (process.env.NODE_ENV !== "production") {
+  app.use((req, res, next) => {
+    console.log(`[${req.method}] ${req.originalUrl}`);
+    next();
+  });
+}
+
 
 // ======================
 // MONGO CONNECTION
@@ -88,10 +94,10 @@ const server = http.createServer(app);
 
 const io = new Server(server, {
   cors: {
-    origin: ["http://localhost:5173", "http://localhost:5174"],
+    origin: process.env.CORS_ORIGIN || "*",
     credentials: true,
   },
-  transports: ["websocket"], // 🔥 fast & stable
+  transports: ["websocket", "polling"], // 🔥 fast & stable
 });
 
 // 🔥 MAKE SOCKET AVAILABLE EVERYWHERE
@@ -136,7 +142,15 @@ app.use("/api/feedback", feedbackRoutes);
 app.get("/", (req, res) => {
   res.json({
     success: true,
-    message: "Backend running successfully",
+    service: "restaurant-backend",
+  });
+});
+
+
+app.get("/health", (req, res) => {
+  res.status(200).json({
+    status: "ok",
+    uptime: process.uptime(),
   });
 });
 
@@ -162,4 +176,13 @@ const PORT = process.env.PORT || 5001;
 
 server.listen(PORT, () => {
   console.log(`🚀 Server running on port ${PORT}`);
+});
+
+process.on("unhandledRejection", (err) => {
+  console.error("Unhandled Rejection:", err);
+});
+
+process.on("uncaughtException", (err) => {
+  console.error("Uncaught Exception:", err);
+  process.exit(1);
 });

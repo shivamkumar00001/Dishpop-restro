@@ -6,7 +6,7 @@ import Sidebar from "../../components/Sidebar";
 import ARViewStatistics from "./ArViewStatistics";
 import FeedbackSummary from "./FeedbackSummary";
 import ModelInsights from "./ModelsInsights";
-import LiveOrdersPanel from "../../components/orders/LiveOrderPanel";
+import LiveOrdersPanel from "./LiveOrderPanel";
 
 import { api } from "../../services/api";
 

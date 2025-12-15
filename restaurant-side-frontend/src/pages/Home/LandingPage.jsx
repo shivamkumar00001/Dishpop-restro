@@ -133,14 +133,6 @@ const LandingPage = () => {
     navigate('/register');
   };
 
-  const handleRequestDemo = () => {
-    navigate('/register');
-  };
-
-  const handlePartnerWithUs = () => {
-    navigate('/register');
-  };
-
   return (
     <div className="bg-black text-white min-h-screen font-sans">
       {/* Hero Section */}
@@ -163,12 +155,12 @@ const LandingPage = () => {
               >
                 Get Started
               </button>
-              <button 
+              {/* <button 
                 onClick={handleRequestDemo}
                 className="border border-gray-700 hover:border-gray-500 text-white px-8 py-3 rounded-lg font-semibold transition-all"
               >
                 Request Demo
-              </button>
+              </button> */}
             </div>
           </div>
           
@@ -294,7 +286,6 @@ const LandingPage = () => {
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <button 
-              onClick={handlePartnerWithUs}
               className="bg-cyan-500 hover:bg-cyan-600 text-white px-8 py-3 rounded-lg font-semibold transition-all flex items-center justify-center gap-2 shadow-lg"
             >
               Partner With Us <ChevronRight className="w-5 h-5" />

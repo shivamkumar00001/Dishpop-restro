@@ -18,7 +18,6 @@ const DishList = () => {
     filteredDishes,
     categories,
     statuses,
-    statistics,
     searchQuery,
     setSearchQuery,
     selectedCategory,
